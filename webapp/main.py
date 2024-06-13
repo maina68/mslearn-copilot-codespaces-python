@@ -1,5 +1,6 @@
 import os
 import base64
+import hashlib  # Add this line to import the hashlib module
 from typing import Union
 from os.path import dirname, abspath, join
 from fastapi import FastAPI
@@ -35,3 +36,11 @@ def generate(body: Body):
     """
     string = base64.b64encode(os.urandom(64))[:body.length].decode('utf-8')
     return {'token': string}
+
+    # generate a Pydantic model for the response body
+    class Text(BaseModel):
+        text: str    
+    # Create a FastAPI endpoint that accepts a POST request with a JSON body containing a single field called "text" and returns a checksum of the text
+    @app.post("/checksum", response_model=Text)
+    def checksum(text: Text):
+        return {"text": hashlib.md5(text.text.encode()).hexdigest()}
